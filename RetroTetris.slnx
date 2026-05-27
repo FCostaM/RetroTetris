@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="RetroTetris.Core/RetroTetris.Core.csproj" />
+  <Project Path="RetroTetris.Tests/RetroTetris.Tests.csproj" />
+  <Project Path="RetroTetris/RetroTetris.csproj" />
+</Solution>
