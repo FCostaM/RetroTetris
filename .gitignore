@@ -1,0 +1,80 @@
+# ─── Build output ────────────────────────────────────────────────────────────
+bin/
+obj/
+out/
+
+# ─── Visual Studio ────────────────────────────────────────────────────────────
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+
+# ─── Visual Studio Code ───────────────────────────────────────────────────────
+.vscode/
+
+# ─── .NET ─────────────────────────────────────────────────────────────────────
+*.dll
+*.exe
+*.pdb
+*.cache
+*.nupkg
+*.snupkg
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# ─── MAUI / Mobile ────────────────────────────────────────────────────────────
+# Android
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# iOS / MacCatalyst
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# Windows packaging
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.appx
+*.appxbundle
+*.appxupload
+*.msix
+*.msixbundle
+*.msixupload
+
+# ─── NuGet ────────────────────────────────────────────────────────────────────
+*.nuget.props
+*.nuget.targets
+packages/
+.nuget/
+
+# ─── Test results ─────────────────────────────────────────────────────────────
+TestResults/
+coverage/
+*.trx
+*.coveragexml
+*.coverage
+
+# ─── OS ───────────────────────────────────────────────────────────────────────
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# ─── Kiro ─────────────────────────────────────────────────────────────────────
+# Manter specs e steering (documentação do projeto)
+# Ignorar apenas configurações locais se houver
+.kiro/settings/
