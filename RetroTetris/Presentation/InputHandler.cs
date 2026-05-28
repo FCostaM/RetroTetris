@@ -123,8 +123,8 @@ public class InputHandler : IInputHandler
         GameKey.X       => new RotateCounterClockwiseCommand(),
         GameKey.C       => new HoldCommand(),
         GameKey.Shift   => new HoldCommand(),
-        GameKey.Escape  => new PauseCommand(),
-        GameKey.P       => new PauseCommand(),
+        GameKey.Escape  => new TogglePauseCommand(),
+        GameKey.P       => new TogglePauseCommand(),
         _ => null
     };
 }

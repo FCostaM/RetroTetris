@@ -14,7 +14,7 @@ public class CommandTests
         public string? LastCalledMethod { get; private set; }
 
         // IGameEngine properties — return defaults
-        public IGameState CurrentState => null!;
+        public IGameState CurrentState { get; set; } = null!;
         public Board Board => null!;
         public Tetromino? ActivePiece => null;
         public Tetromino? GhostPiece => null;
@@ -111,10 +111,18 @@ public class CommandTests
     }
 
     [Fact]
-    public void PauseCommand_Execute_CallsPause()
+    public void TogglePauseCommand_WhenPlaying_CallsPause()
     {
-        var stub = new StubEngine();
-        new PauseCommand().Execute(stub);
+        var stub = new StubEngine { CurrentState = new PlayingState() };
+        new TogglePauseCommand().Execute(stub);
         Assert.Equal(nameof(StubEngine.Pause), stub.LastCalledMethod);
+    }
+
+    [Fact]
+    public void TogglePauseCommand_WhenPaused_CallsResume()
+    {
+        var stub = new StubEngine { CurrentState = new PausedState() };
+        new TogglePauseCommand().Execute(stub);
+        Assert.Equal(nameof(StubEngine.Resume), stub.LastCalledMethod);
     }
 }
