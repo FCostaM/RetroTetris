@@ -23,6 +23,7 @@ A faithful implementation of the classic Tetris game as a native desktop applica
 - 📋 Next 3 pieces preview panel
 - 📈 Score, level, and high score tracking with local persistence
 - ⏸️ Pause/resume support
+- 📖 In-game controls screen accessible from the start screen and pause overlay
 - 🔊 Retro sound effects and background music via Plugin.Maui.Audio
 - 📐 Responsive layout that adapts to window size (portrait and landscape)
 - ⌨️ Keyboard controls with DAS/ARR (Delayed Auto Shift / Auto Repeat Rate)
@@ -40,6 +41,7 @@ A faithful implementation of the classic Tetris game as a native desktop applica
 | X | Rotate counter-clockwise |
 | C or Shift | Hold piece |
 | Escape or P | Pause / Resume |
+| H | Controls screen |
 
 ---
 
@@ -58,7 +60,7 @@ RetroTetris.slnx
 
 | Pattern | Where | Purpose |
 |---|---|---|
-| **State Machine** | `GameEngine` + `IGameState` | Manages game states (StartScreen, Playing, Paused, GameOver) without scattered if/switch |
+| **State Machine** | `GameEngine` + `IGameState` | Manages game states (StartScreen, Playing, Paused, ControlsScreen, GameOver) without scattered if/switch |
 | **Command** | `IGameCommand` + `CommandQueue` | Decouples input from game logic; enables thread-safe command passing |
 | **Observer** | `GameEngine` C# events | Decouples engine from audio, scoring, and UI updates |
 | **Game Loop** | `GameLoop` (dedicated thread) | Real delta time via `Stopwatch`; explicit ProcessInput → Update → Render phases |
