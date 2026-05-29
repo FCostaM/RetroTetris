@@ -141,6 +141,7 @@ public partial class GamePage : ContentPage
         VirtualKey.Shift    => GameKey.Shift,
         VirtualKey.Escape   => GameKey.Escape,
         VirtualKey.P        => GameKey.P,
+        VirtualKey.H        => GameKey.H,
         VirtualKey.Enter    => GameKey.Space,  // Enter = hard drop during play
         _ => null
     };
@@ -171,11 +172,29 @@ public partial class GamePage : ContentPage
 
         var state = _engine.CurrentState;
 
-        // ── Start screen: tap the Start button ──────────────────────────────
+        // ── Controls screen: tap the BACK button ────────────────────────────
+        if (state is ControlsScreenState)
+        {
+            if (IsBackButtonHit(tapX, tapY))
+                _engine.HideControls();
+            return;
+        }
+
+        // ── Start screen: tap the Start or Controls button ──────────────────
         if (state is StartScreenState)
         {
             if (IsStartButtonHit(tapX, tapY))
                 _engine.StartNewGame();
+            else if (IsControlsButtonHit(tapX, tapY))
+                _engine.ShowControls();
+            return;
+        }
+
+        // ── Paused: tap the Controls button ─────────────────────────────────
+        if (state is PausedState)
+        {
+            if (IsControlsButtonHitOnPause(tapX, tapY))
+                _engine.ShowControls();
             return;
         }
 
@@ -193,7 +212,7 @@ public partial class GamePage : ContentPage
             return;
         }
 
-        // ── Playing / Paused: tap left/right half to rotate ─────────────────
+        // ── Playing: tap left/right half to rotate ───────────────────────────
         if (state is PlayingState)
         {
             var side = tapX < GameCanvas.Width / 2
@@ -264,6 +283,48 @@ public partial class GamePage : ContentPage
         float btnH = Math.Max(20, boardRect.Height * 0.09f);
         float centerY = boardRect.Y + boardRect.Height * 0.84f;
         float btnX = boardRect.X + (boardRect.Width - btnW) / 2f;
+        float btnY = centerY - btnH / 2f;
+        return x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH;
+    }
+
+    /// <summary>
+    /// Mirrors DrawControlsButton() in GameRenderer — btnY = h * 0.68f.
+    /// </summary>
+    private bool IsControlsButtonHit(float x, float y)
+    {
+        float w = (float)GameCanvas.Width;
+        float h = (float)GameCanvas.Height;
+        float btnW = w * 0.3f;
+        float btnH = h * 0.08f;
+        float btnX = (w - btnW) / 2f;
+        float btnY = h * 0.68f;
+        return x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH;
+    }
+
+    /// <summary>
+    /// Mirrors DrawControlsButtonOnPause() in GameRenderer — centerY = r.Y + r.Height * 0.62f.
+    /// </summary>
+    private bool IsControlsButtonHitOnPause(float x, float y)
+    {
+        var r = _layout.BoardRect;
+        float btnW = r.Width * 0.7f;
+        float btnH = Math.Max(20, r.Height * 0.09f);
+        float centerY = r.Y + r.Height * 0.62f;
+        float btnX = r.X + (r.Width - btnW) / 2f;
+        float btnY = centerY - btnH / 2f;
+        return x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH;
+    }
+
+    /// <summary>
+    /// Mirrors DrawBackButton() in GameRenderer — centerY = r.Y + r.Height * 0.91f.
+    /// </summary>
+    private bool IsBackButtonHit(float x, float y)
+    {
+        var r = _layout.BoardRect;
+        float btnW = r.Width * 0.5f;
+        float btnH = Math.Max(18, r.Height * 0.08f);
+        float centerY = r.Y + r.Height * 0.91f;
+        float btnX = r.X + (r.Width - btnW) / 2f;
         float btnY = centerY - btnH / 2f;
         return x >= btnX && x <= btnX + btnW && y >= btnY && y <= btnY + btnH;
     }

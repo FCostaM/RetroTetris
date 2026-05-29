@@ -6,6 +6,7 @@ namespace RetroTetris.Core.Commands;
 /// <summary>
 /// Toggles between paused and playing states.
 /// Calls Pause() when in PlayingState, Resume() when in PausedState.
+/// Calls HideControls() when in ControlsScreenState (Escape/P close the Controls_Screen).
 /// </summary>
 public sealed class TogglePauseCommand : IGameCommand
 {
@@ -15,5 +16,7 @@ public sealed class TogglePauseCommand : IGameCommand
             e.Pause();
         else if (e.CurrentState is PausedState)
             e.Resume();
+        else if (e.CurrentState is ControlsScreenState)
+            e.HideControls();
     }
 }

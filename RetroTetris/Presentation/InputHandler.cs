@@ -125,6 +125,7 @@ public class InputHandler : IInputHandler
         GameKey.Shift   => new HoldCommand(),
         GameKey.Escape  => new TogglePauseCommand(),
         GameKey.P       => new TogglePauseCommand(),
+        GameKey.H       => new ToggleControlsCommand(),
         _ => null
     };
 }
