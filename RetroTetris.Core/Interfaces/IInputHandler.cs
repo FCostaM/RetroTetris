@@ -11,7 +11,7 @@ public interface IInputHandler
 
 public enum GameKey
 {
-    Left, Right, Down, Up, Space, Z, X, C, Shift, Escape, P
+    Left, Right, Down, Up, Space, Z, X, C, Shift, Escape, P, H
 }
 
 public enum SwipeDirection

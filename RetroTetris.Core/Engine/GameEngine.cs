@@ -264,6 +264,25 @@ public class GameEngine : IGameEngine
         // Do NOT reset _dropAccumulator — the piece continues from where it was
     }
 
+    /// <summary>
+    /// Opens the Controls_Screen. Only valid when in StartScreenState or PausedState.
+    /// </summary>
+    public void ShowControls()
+    {
+        if (_currentState is StartScreenState or PausedState)
+            TransitionTo(new ControlsScreenState(_currentState));
+    }
+
+    /// <summary>
+    /// Closes the Controls_Screen and returns to the stored PreviousState.
+    /// Only valid when in ControlsScreenState.
+    /// </summary>
+    public void HideControls()
+    {
+        if (_currentState is ControlsScreenState css)
+            TransitionTo(css.PreviousState);
+    }
+
     #endregion
 
     #region Private helpers 

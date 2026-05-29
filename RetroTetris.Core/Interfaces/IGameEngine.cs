@@ -32,6 +32,8 @@ public interface IGameEngine
     void Hold();
     void Pause();
     void Resume();
+    void ShowControls();
+    void HideControls();
 
     // Observer events
     event Action<int, int> LinesCleared;      // (linesCount, currentLevel)
