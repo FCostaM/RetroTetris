@@ -49,6 +49,31 @@ public class GameRenderer : IDrawable, IGameRenderer
 
     private const string PixelFont = "PressStart2P";
 
+    // ─── Controls screen data ──────────────────────────────────────────────────
+
+    private static readonly (string key, string action)[] _keyboardEntries =
+    {
+        ("←",         "MOVE LEFT"),
+        ("→",         "MOVE RIGHT"),
+        ("↓",         "SOFT DROP"),
+        ("SPACE",     "HARD DROP"),
+        ("↑ / Z",     "ROTATE CW"),
+        ("X",         "ROTATE CCW"),
+        ("C / SHIFT", "HOLD"),
+        ("P / ESC",   "PAUSE/RESUME"),
+        ("H",         "CONTROLS"),
+    };
+
+    private static readonly (string key, string action)[] _touchEntries =
+    {
+        ("SWIPE ←", "MOVE LEFT"),
+        ("SWIPE →", "MOVE RIGHT"),
+        ("SWIPE ↓", "SOFT DROP"),
+        ("SWIPE ↑", "HARD DROP"),
+        ("TAP ←",   "ROTATE CCW"),
+        ("TAP →",   "ROTATE CW"),
+    };
+
     // ─── Constructor ───────────────────────────────────────────────────────────
 
     public GameRenderer(LayoutManager layout)
@@ -91,6 +116,14 @@ public class GameRenderer : IDrawable, IGameRenderer
             return;
         }
 
+        // ControlsScreenState com PreviousState = StartScreenState
+        if (state is ControlsScreenState { PreviousState: StartScreenState })
+        {
+            DrawStartScreen(canvas, dirtyRect);
+            DrawControlsOverlay(canvas, dirtyRect);
+            return;
+        }
+
         // Draw board area
         DrawBoardBackground(canvas);
         DrawBoardCells(canvas);
@@ -110,6 +143,11 @@ public class GameRenderer : IDrawable, IGameRenderer
             DrawPauseOverlay(canvas, dirtyRect);
         else if (state is GameOverState)
             DrawGameOverOverlay(canvas, dirtyRect);
+        else if (state is ControlsScreenState { PreviousState: PausedState })
+        {
+            DrawPauseOverlay(canvas, dirtyRect);
+            DrawControlsOverlay(canvas, dirtyRect);
+        }
     }
 
     // ─── Start Screen ──────────────────────────────────────────────────────────
@@ -150,6 +188,31 @@ public class GameRenderer : IDrawable, IGameRenderer
         canvas.FontColor = Color.FromArgb("#666666");
         canvas.FontSize = Math.Max(6, bounds.Width * 0.013f);
         canvas.DrawString("PRESS ENTER OR CLICK START", bounds.Width / 2f, bounds.Height * 0.75f,
+            HorizontalAlignment.Center);
+
+        // Controls button
+        DrawControlsButton(canvas, bounds);
+    }
+
+    // ─── Controls button (Start Screen) ───────────────────────────────────────
+
+    private void DrawControlsButton(ICanvas canvas, RectF bounds)
+    {
+        float btnW = bounds.Width * 0.3f;
+        float btnH = bounds.Height * 0.08f;
+        float btnX = (bounds.Width - btnW) / 2f;
+        float btnY = bounds.Height * 0.68f;
+
+        canvas.FillColor = ButtonBg;
+        canvas.FillRectangle(btnX, btnY, btnW, btnH);
+        canvas.StrokeColor = Color.FromArgb("#888888");
+        canvas.StrokeSize = 2;
+        canvas.DrawRectangle(btnX, btnY, btnW, btnH);
+
+        canvas.FontColor = Color.FromArgb("#888888");
+        canvas.FontSize = Math.Max(8, bounds.Width * 0.022f);
+        canvas.Font = new MauiFont(PixelFont);
+        canvas.DrawString("CONTROLS", btnX + btnW / 2f, btnY + btnH / 2f,
             HorizontalAlignment.Center);
     }
 
@@ -445,6 +508,168 @@ public class GameRenderer : IDrawable, IGameRenderer
         canvas.FontColor = Color.FromArgb("#888888");
         canvas.DrawString("PRESS P TO RESUME", r.X + r.Width / 2f, r.Y + r.Height / 2f + 20,
             HorizontalAlignment.Center);
+
+        // Controls button below the pause text
+        DrawControlsButtonOnPause(canvas, r);
+    }
+
+    // ─── Controls button (Pause overlay) ──────────────────────────────────────
+
+    private void DrawControlsButtonOnPause(ICanvas canvas, RectF boardRect)
+    {
+        var r = boardRect;
+        float btnW = r.Width * 0.7f;
+        float btnH = Math.Max(20, r.Height * 0.09f);
+        float centerY = r.Y + r.Height * 0.62f;
+        float btnX = r.X + (r.Width - btnW) / 2f;
+        float btnY = centerY - btnH / 2f;
+
+        canvas.FillColor = ButtonBg;
+        canvas.FillRectangle(btnX, btnY, btnW, btnH);
+        canvas.StrokeColor = Color.FromArgb("#888888");
+        canvas.StrokeSize = 1.5f;
+        canvas.DrawRectangle(btnX, btnY, btnW, btnH);
+
+        canvas.FontColor = Color.FromArgb("#888888");
+        canvas.FontSize = Math.Max(6, r.Width * 0.045f);
+        canvas.Font = new MauiFont(PixelFont);
+        canvas.DrawString("CONTROLS", btnX + btnW / 2f, centerY,
+            HorizontalAlignment.Center);
+    }
+
+    // ─── Controls overlay ─────────────────────────────────────────────────────
+
+    private void DrawControlsOverlay(ICanvas canvas, RectF bounds)
+    {
+        var r = _layout.BoardRect;
+
+        // Semi-transparent background (consistent with PauseOverlay and GameOverOverlay)
+        canvas.FillColor = OverlayBg;
+        canvas.FillRectangle(r);
+
+        // Decorative retro border — outer cyan line
+        canvas.StrokeColor = Color.FromArgb("#00F0F0");
+        canvas.StrokeSize = 2;
+        canvas.DrawRectangle(r.X + 4, r.Y + 4, r.Width - 8, r.Height - 8);
+        // Inner dark line
+        canvas.StrokeColor = Color.FromArgb("#444444");
+        canvas.StrokeSize = 1;
+        canvas.DrawRectangle(r.X + 7, r.Y + 7, r.Width - 14, r.Height - 14);
+
+        // Title
+        canvas.FontColor = Color.FromArgb("#00F0F0");
+        canvas.FontSize = Math.Max(8, r.Width * 0.07f);
+        canvas.Font = new MauiFont(PixelFont);
+        canvas.DrawString("CONTROLS", r.X + r.Width / 2f, r.Y + r.Height * 0.07f,
+            HorizontalAlignment.Center);
+
+        // Separator below title
+        float separatorY = r.Y + r.Height * 0.12f;
+        canvas.StrokeColor = Color.FromArgb("#444444");
+        canvas.StrokeSize = 1;
+        canvas.DrawLine(r.X + 12, separatorY, r.X + r.Width - 12, separatorY);
+
+        // ── Two-column layout ──────────────────────────────────────────────────
+        float colW      = r.Width / 2f;
+        float padding   = r.Width * 0.04f;
+        float contentY  = separatorY + r.Height * 0.04f;
+
+        // Left column — KEYBOARD
+        float leftColX = r.X;
+        DrawColumnHeader(canvas, r, "KEYBOARD", leftColX + colW / 2f, contentY);
+        float kbListY = contentY + r.Height * 0.06f;
+        DrawCommandEntriesColumn(canvas, r, _keyboardEntries, leftColX + padding, leftColX + colW - padding, kbListY);
+
+        // Vertical divider
+        float divX = r.X + colW;
+        canvas.StrokeColor = Color.FromArgb("#333333");
+        canvas.StrokeSize = 1;
+        canvas.DrawLine(divX, separatorY + 4, divX, r.Y + r.Height * 0.88f);
+
+        // Right column — TOUCH
+        float rightColX = r.X + colW;
+        DrawColumnHeader(canvas, r, "TOUCH", rightColX + colW / 2f, contentY);
+        float touchListY = contentY + r.Height * 0.06f;
+        DrawCommandEntriesColumn(canvas, r, _touchEntries, rightColX + padding, rightColX + colW - padding, touchListY);
+
+        // BACK button — always below both columns
+        DrawBackButton(canvas, r);
+    }
+
+    private void DrawColumnHeader(ICanvas canvas, RectF boardRect, string title, float centerX, float y)
+    {
+        canvas.FontColor = Color.FromArgb("#666666");
+        canvas.FontSize = Math.Max(5, boardRect.Width * 0.035f);
+        canvas.Font = new MauiFont(PixelFont);
+        canvas.DrawString(title, centerX, y, HorizontalAlignment.Center);
+    }
+
+    private void DrawCommandEntriesColumn(ICanvas canvas, RectF boardRect,
+        (string key, string action)[] entries, float leftX, float rightX, float startY)
+    {
+        float rowH     = boardRect.Height * 0.065f;
+        float fontSize = Math.Max(4, boardRect.Width * 0.032f);
+
+        canvas.Font = new MauiFont(PixelFont);
+
+        for (int i = 0; i < entries.Length; i++)
+        {
+            float y = startY + i * rowH;
+
+            // Key label — left-aligned, cyan
+            canvas.FontColor = Color.FromArgb("#00F0F0");
+            canvas.FontSize = fontSize;
+            canvas.DrawString(entries[i].key, leftX, y, HorizontalAlignment.Left);
+
+            // Action description — right-aligned, light text
+            canvas.FontColor = TextColor;
+            canvas.FontSize = fontSize;
+            canvas.DrawString(entries[i].action, rightX, y, HorizontalAlignment.Right);
+        }
+    }
+
+    private void DrawCommandEntries(ICanvas canvas, RectF boardRect,
+        (string key, string action)[] entries, float startY)
+    {
+        float rowH     = boardRect.Height * 0.072f;
+        float fontSize = Math.Max(5, boardRect.Width * 0.038f);
+        float leftX    = boardRect.X + boardRect.Width * 0.08f;
+        float rightX   = boardRect.X + boardRect.Width * 0.92f;
+
+        canvas.Font = new MauiFont(PixelFont);
+
+        for (int i = 0; i < entries.Length; i++)
+        {
+            float y = startY + i * rowH;
+
+            canvas.FontColor = Color.FromArgb("#00F0F0");
+            canvas.FontSize = fontSize;
+            canvas.DrawString(entries[i].key, leftX, y, HorizontalAlignment.Left);
+
+            canvas.FontColor = TextColor;
+            canvas.FontSize = fontSize;
+            canvas.DrawString(entries[i].action, rightX, y, HorizontalAlignment.Right);
+        }
+    }
+
+    private void DrawBackButton(ICanvas canvas, RectF boardRect)
+    {
+        float btnW    = boardRect.Width * 0.5f;
+        float btnH    = Math.Max(18, boardRect.Height * 0.08f);
+        float centerY = boardRect.Y + boardRect.Height * 0.91f;
+        float btnX    = boardRect.X + (boardRect.Width - btnW) / 2f;
+        float btnY    = centerY - btnH / 2f;
+
+        canvas.FillColor = ButtonBg;
+        canvas.FillRectangle(btnX, btnY, btnW, btnH);
+        canvas.StrokeColor = Color.FromArgb("#888888");
+        canvas.StrokeSize = 1.5f;
+        canvas.DrawRectangle(btnX, btnY, btnW, btnH);
+
+        canvas.FontColor = Color.FromArgb("#888888");
+        canvas.FontSize = Math.Max(6, boardRect.Width * 0.04f);
+        canvas.Font = new MauiFont(PixelFont);
+        canvas.DrawString("BACK", btnX + btnW / 2f, centerY, HorizontalAlignment.Center);
     }
 
     // ─── Game Over overlay ─────────────────────────────────────────────────────
