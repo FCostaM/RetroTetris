@@ -65,6 +65,8 @@ public class StateMachineTests
         public void Hold() { }
         public void Pause() { }
         public void Resume() { }
+        public void ShowControls() { }
+        public void HideControls() { }
         // Events — required by IGameEngine but not observed in these tests
 #pragma warning disable CS0067
         public event Action<int, int>? LinesCleared;

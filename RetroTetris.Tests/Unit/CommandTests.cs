@@ -50,6 +50,8 @@ public class CommandTests
         public void Hold() => LastCalledMethod = nameof(Hold);
         public void Pause() => LastCalledMethod = nameof(Pause);
         public void Resume() => LastCalledMethod = nameof(Resume);
+        public void ShowControls() => LastCalledMethod = nameof(ShowControls);
+        public void HideControls() => LastCalledMethod = nameof(HideControls);
     }
 
     // ─── Command tests ─────────────────────────────────────────────────────────
@@ -124,5 +126,101 @@ public class CommandTests
         var stub = new StubEngine { CurrentState = new PausedState() };
         new TogglePauseCommand().Execute(stub);
         Assert.Equal(nameof(StubEngine.Resume), stub.LastCalledMethod);
+    }
+
+    // ─── ShowControlsCommand tests ─────────────────────────────────────────────
+
+    [Fact]
+    public void ShowControlsCommand_FromStartScreen_CallsShowControls()
+    {
+        var stub = new StubEngine { CurrentState = new StartScreenState() };
+        new ShowControlsCommand().Execute(stub);
+        Assert.Equal(nameof(StubEngine.ShowControls), stub.LastCalledMethod);
+    }
+
+    [Fact]
+    public void ShowControlsCommand_FromPausedState_CallsShowControls()
+    {
+        var stub = new StubEngine { CurrentState = new PausedState() };
+        new ShowControlsCommand().Execute(stub);
+        Assert.Equal(nameof(StubEngine.ShowControls), stub.LastCalledMethod);
+    }
+
+    [Fact]
+    public void ShowControlsCommand_FromPlayingState_IsNoOp()
+    {
+        var stub = new StubEngine { CurrentState = new PlayingState() };
+        new ShowControlsCommand().Execute(stub);
+        Assert.Null(stub.LastCalledMethod);
+    }
+
+    [Fact]
+    public void ShowControlsCommand_FromControlsScreenState_IsNoOp()
+    {
+        var stub = new StubEngine { CurrentState = new ControlsScreenState(new StartScreenState()) };
+        new ShowControlsCommand().Execute(stub);
+        Assert.Null(stub.LastCalledMethod);
+    }
+
+    // ─── HideControlsCommand tests ─────────────────────────────────────────────
+
+    [Fact]
+    public void HideControlsCommand_FromControlsScreenState_CallsHideControls()
+    {
+        var stub = new StubEngine { CurrentState = new ControlsScreenState(new StartScreenState()) };
+        new HideControlsCommand().Execute(stub);
+        Assert.Equal(nameof(StubEngine.HideControls), stub.LastCalledMethod);
+    }
+
+    [Fact]
+    public void HideControlsCommand_FromOtherState_IsNoOp()
+    {
+        var stub = new StubEngine { CurrentState = new PlayingState() };
+        new HideControlsCommand().Execute(stub);
+        Assert.Null(stub.LastCalledMethod);
+    }
+
+    // ─── ToggleControlsCommand tests ───────────────────────────────────────────
+
+    [Fact]
+    public void ToggleControlsCommand_FromStartScreen_CallsShowControls()
+    {
+        var stub = new StubEngine { CurrentState = new StartScreenState() };
+        new ToggleControlsCommand().Execute(stub);
+        Assert.Equal(nameof(StubEngine.ShowControls), stub.LastCalledMethod);
+    }
+
+    [Fact]
+    public void ToggleControlsCommand_FromPausedState_CallsShowControls()
+    {
+        var stub = new StubEngine { CurrentState = new PausedState() };
+        new ToggleControlsCommand().Execute(stub);
+        Assert.Equal(nameof(StubEngine.ShowControls), stub.LastCalledMethod);
+    }
+
+    [Fact]
+    public void ToggleControlsCommand_FromControlsScreenState_CallsHideControls()
+    {
+        var stub = new StubEngine { CurrentState = new ControlsScreenState(new PausedState()) };
+        new ToggleControlsCommand().Execute(stub);
+        Assert.Equal(nameof(StubEngine.HideControls), stub.LastCalledMethod);
+    }
+
+    [Fact]
+    public void ToggleControlsCommand_FromPlayingState_IsNoOp()
+    {
+        var stub = new StubEngine { CurrentState = new PlayingState() };
+        new ToggleControlsCommand().Execute(stub);
+        Assert.Null(stub.LastCalledMethod);
+    }
+
+    // ─── TogglePauseCommand — ControlsScreenState branch ──────────────────────
+
+    [Fact]
+    public void TogglePauseCommand_FromControlsScreenState_CallsHideControls()
+    {
+        var stub = new StubEngine { CurrentState = new ControlsScreenState(new PausedState()) };
+        new TogglePauseCommand().Execute(stub);
+        Assert.Equal(nameof(StubEngine.HideControls), stub.LastCalledMethod);
     }
 }
