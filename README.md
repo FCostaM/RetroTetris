@@ -103,6 +103,16 @@ dotnet run --project RetroTetris/RetroTetris.csproj -f net10.0-windows10.0.19041
 dotnet test RetroTetris.Tests/RetroTetris.Tests.csproj
 ```
 
+### Publish
+
+To generate a self-contained executable (no .NET installation required on the target machine):
+
+```bash
+dotnet publish RetroTetris/RetroTetris.csproj -f net10.0-windows10.0.19041.0 -c Release -r win-x64 --self-contained true
+```
+
+The output will be in `RetroTetris/bin/Release/net10.0-windows10.0.19041.0/win-x64/publish/`.
+
 ---
 
 ## Project Structure
