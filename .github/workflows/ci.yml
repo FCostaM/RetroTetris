@@ -1,0 +1,37 @@
+name: CI
+
+# Runs on every push and pull request to any branch
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: windows-latest
+
+    steps:
+      # 1. Checkout the repository code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Install .NET 10 SDK
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      # 3. Install MAUI workload (required to build the MAUI project)
+      - name: Install MAUI workload
+        run: dotnet workload install maui-windows
+
+      # 4. Restore NuGet dependencies
+      - name: Restore dependencies
+        run: dotnet restore RetroTetris.slnx
+
+      # 5. Build the entire solution to verify nothing is broken
+      - name: Build
+        run: dotnet build RetroTetris.slnx --no-restore -c Release
+
+      # 6. Run the test project
+      - name: Test
+        run: dotnet test RetroTetris.Tests/RetroTetris.Tests.csproj --no-build -c Release
