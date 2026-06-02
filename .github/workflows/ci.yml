@@ -24,17 +24,22 @@ jobs:
       - name: Install MAUI workload
         run: dotnet workload install maui-windows
 
-      # 4. Restore NuGet dependencies
-      #    -r win-x64 ensures the runtime pack for win-x64 is downloaded,
-      #    which is required to build the MAUI Windows project
+      # 4. Restore NuGet dependencies per project
+      #    The MAUI project requires -r win-x64 to download the correct runtime pack
+      #    The Core and Tests projects use net10.0 and don't need a RID
       - name: Restore dependencies
-        run: dotnet restore RetroTetris.slnx -r win-x64
+        run: |
+          dotnet restore RetroTetris.Core/RetroTetris.Core.csproj
+          dotnet restore RetroTetris/RetroTetris.csproj -r win-x64
+          dotnet restore RetroTetris.Tests/RetroTetris.Tests.csproj
 
-      # 5. Build the entire solution to verify nothing is broken
+      # 5. Build each project to verify nothing is broken
       - name: Build
-        run: dotnet build RetroTetris.slnx --no-restore -c Release -r win-x64
+        run: |
+          dotnet build RetroTetris.Core/RetroTetris.Core.csproj --no-restore -c Release
+          dotnet build RetroTetris/RetroTetris.csproj --no-restore -c Release -r win-x64
+          dotnet build RetroTetris.Tests/RetroTetris.Tests.csproj --no-restore -c Release
 
       # 6. Run the test project
-      #    The test project targets net10.0 (no platform RID needed)
       - name: Test
-        run: dotnet test RetroTetris.Tests/RetroTetris.Tests.csproj -c Release
+        run: dotnet test RetroTetris.Tests/RetroTetris.Tests.csproj --no-build -c Release
