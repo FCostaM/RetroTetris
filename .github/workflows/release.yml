@@ -6,6 +6,10 @@ on:
     tags:
       - 'v*.*.*'
 
+# Required to create GitHub Releases and upload assets
+permissions:
+  contents: write
+
 jobs:
   build-and-release:
     runs-on: windows-latest
@@ -42,10 +46,13 @@ jobs:
           --self-contained true
           -o publish/RetroTetris
 
-      # 6. Zip the published output
-      #    The tag name (e.g. v1.0.0) is used to name the zip file
+      # 6. Zip only the published output folder contents
+      #    Navigating into the folder first ensures the zip contains only the release files
+      #    without any intermediate build artifacts from parent directories
       - name: Zip artifact
-        run: Compress-Archive -Path publish/RetroTetris/* -DestinationPath RetroTetris-${{ github.ref_name }}-win-x64.zip
+        run: |
+          cd publish/RetroTetris
+          Compress-Archive -Path * -DestinationPath ../../RetroTetris-${{ github.ref_name }}-win-x64.zip
 
       # 7. Create a GitHub Release and attach the zip
       #    generate_release_notes: auto-generates changelog from commits since last tag
